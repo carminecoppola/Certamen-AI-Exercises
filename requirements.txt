@@ -1,1 +1,2 @@
 # Dipendenze del progetto
+openai~=1.60.2

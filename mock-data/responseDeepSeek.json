@@ -7,17 +7,10 @@
             "tests": [
                 {
                     "input": [
-                        1,
-                        2
+                        2,
+                        3
                     ],
-                    "output": 3
-                },
-                {
-                    "input": [
-                        0,
-                        0
-                    ],
-                    "output": 0
+                    "output": 5
                 },
                 {
                     "input": [
@@ -25,6 +18,13 @@
                         1
                     ],
                     "output": 0
+                },
+                {
+                    "input": [
+                        10,
+                        20
+                    ],
+                    "output": 30
                 }
             ]
         },
