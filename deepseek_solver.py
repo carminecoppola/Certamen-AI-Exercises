@@ -1,0 +1,1 @@
+# Invia esercizi a DeepSeek e raccoglie le risposte
