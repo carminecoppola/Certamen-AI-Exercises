@@ -17,8 +17,8 @@ Before starting, make sure you have installed:
 Open a terminal and clone the project:
 
 ```sh
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
+git clone https://github.com/carminecoppola/AIED.git
+cd AIED
 ```
 
 ### 2. **Create and activate a virtual environment**
@@ -29,11 +29,6 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-On **Windows**:
-```sh
-python -m venv .venv
-.venv\Scripts\activate
-```
 
 ### 3. **Install dependencies**
 
