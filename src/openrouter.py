@@ -15,26 +15,28 @@ OUTPUT_FILE = "outputDeepSeek.json"
 
 
 def create_prompts():
-    """Legge il file JSON e restituisce solo il primo esercizio."""
+    """Legge il file JSON e restituisce solo il primo esercizio sotto forma di prompt."""
     try:
         with open(INPUT_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            data = json.load(f)  # Carica il JSON come una lista
 
-        if "Python_Exercises" not in data:
-            print("Errore: Nessuna chiave 'Python_Exercises' trovata nel JSON.")
+        if not isinstance(data, list):  # Controlla se il JSON è una lista
+            print("Errore: Il JSON non è una lista di esercizi.")
             return []
 
-        for index, exercise in enumerate(data["Python_Exercises"], start=1):
-            for _, details in exercise.items():
-                if "description" in details:
-                    prompt_text = f"Esercizio {index}: {details['description']}"
-                    print(prompt_text)
-                    return [prompt_text]  # Restituisce solo il primo esercizio
+        if not data:  # Controlla se la lista è vuota
+            print("Errore: Nessun esercizio trovato nel JSON.")
+            return []
+
+        first_exercise = data[0]  # Prende il primo esercizio
+        if "description" in first_exercise:
+            prompt_text = f"Esercizio 1: {first_exercise['description']}"
+            print(prompt_text)
+            return [prompt_text]  # Restituisce una lista con il primo esercizio
 
     except Exception as e:
         print(f"Errore nella lettura del file JSON: {e}")
         return []
-
 
 def query_deepseek(prompt):
     """Invia una richiesta all'API di OpenRouter e restituisce la risposta in JSON."""
