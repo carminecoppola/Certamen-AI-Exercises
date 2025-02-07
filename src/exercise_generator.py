@@ -19,9 +19,9 @@ def generate_exercises_from_openai() :
 
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
-    prompt = """Generate a set of 10 exercises (ranging from beginner to hard difficulty) in Python 
-    with name, description, and a set of input and output to test if the given code is correct.
-    Return all in JSON format."""
+    prompt = """Generate a set of 10 exercises (ranging from beginner to hard difficulty) in programming 
+    languages like Python, C, C++, javascript with name, description, and a set of input and output to 
+    test if the given code is correct. Return all in JSON format."""
 
     try :
         print("\nGenerating exercises from OpenAI...")
