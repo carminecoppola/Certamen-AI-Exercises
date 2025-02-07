@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
 
-# Configurazione API e file di input/output
+# Configuration API &  input/output file
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 DEEPSEEK_MODEL = "deepseek/deepseek-chat"
 
@@ -15,28 +15,31 @@ OUTPUT_FILE = "outputDeepSeek.json"
 
 
 def create_prompts():
-    """Legge il file JSON e restituisce solo il primo esercizio sotto forma di prompt."""
+    """Legge il file JSON e genera il prompt per DeepSeek."""
     try:
         with open(INPUT_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)  # Carica il JSON come una lista
+            data = json.load(f)
 
-        if not isinstance(data, list):  # Controlla se il JSON è una lista
-            print("Errore: Il JSON non è una lista di esercizi.")
+        if not isinstance(data, list) or not data:
+            print("Errore: Nessun esercizio valido trovato nel JSON.")
             return []
 
-        if not data:  # Controlla se la lista è vuota
-            print("Errore: Nessun esercizio trovato nel JSON.")
-            return []
+        first_exercise = data[0]
 
-        first_exercise = data[0]  # Prende il primo esercizio
-        if "description" in first_exercise:
-            prompt_text = f"Esercizio 1: {first_exercise['description']}"
-            print(prompt_text)
-            return [prompt_text]  # Restituisce una lista con il primo esercizio
+        if "name" in first_exercise and "description" in first_exercise:
+            prompt_text = (
+                f"Esercizio: {first_exercise['name']}\n"
+                f"Descrizione: {first_exercise['description']}\n"
+                "Provide the solution as code, with a function that implements the required logic."
+            )
+
+            print("\nPrompt generato per DeepSeek:\n", prompt_text)
+            return [prompt_text]
 
     except Exception as e:
         print(f"Errore nella lettura del file JSON: {e}")
         return []
+
 
 def query_deepseek(prompt):
     """Invia una richiesta all'API di OpenRouter e restituisce la risposta in JSON."""
@@ -53,7 +56,7 @@ def query_deepseek(prompt):
     payload = {
         "model": DEEPSEEK_MODEL,
         "messages": [
-            {"role": "system", "content": "Rispondi sempre in formato JSON."},
+            {"role": "system", "content": "Fornisci sempre la risposta in JSON e includi il codice Python per risolvere l'esercizio."},
             {"role": "user", "content": prompt}
         ]
     }
@@ -61,7 +64,16 @@ def query_deepseek(prompt):
     try:
         response = requests.post(API_URL, headers=headers, json=payload)
         response.raise_for_status()
-        return response.json()
+        response_json = response.json()
+
+        print("Risposta API DeepSeek:", json.dumps(response_json, indent=4, ensure_ascii=False))
+
+        if "choices" in response_json and response_json["choices"]:
+            return response_json
+        else:
+            print("Errore: Risposta API non valida.")
+            return None
+
     except requests.exceptions.RequestException as e:
         print(f"Errore API: {e}")
         return None
@@ -70,25 +82,47 @@ def query_deepseek(prompt):
 def save_output_to_json(results):
     """Salva solo i campi desiderati in un file JSON."""
     try:
-        filtered_results = [
-            {
-                "exercise": result["exercise"],
-                "prompt": result["prompt"],
-                "solution": {
-                    "choices": [
-                        {
-                            "content": result["solution"]["choices"][0]["message"]["content"]
-                        }
-                    ]
-                }
-            }
-            for result in results
-        ]
+        filtered_results = []
+        for result in results:
+            exercise = result.get("exercise", "Esercizio sconosciuto")
+            prompt = result.get("prompt", "Prompt non disponibile")
 
+            # Estrarre la soluzione dall'API DeepSeek
+            solution_choices = result.get("solution", {}).get("choices", [])
+
+            if solution_choices and isinstance(solution_choices, list):
+                message_content = solution_choices[0].get("message", {}).get("content", "")
+
+                # Tentiamo di estrarre il codice Python
+                solution = "Soluzione non disponibile"
+
+                # Controlliamo prima se il contenuto è un JSON che contiene il codice
+                if "```json" in message_content:
+                    try:
+                        json_part = message_content.split("```json")[1].split("```")[0].strip()
+                        json_data = json.loads(json_part)  # Decodifica il JSON interno
+                        solution = json_data.get("code", solution)  # Estrarre il codice dal JSON
+                    except json.JSONDecodeError:
+                        pass  # Se fallisce, proseguiamo a cercare il blocco Python
+
+                # Se il codice è anche ripetuto nel blocco ```python```, prendiamo quello
+                if "```python" in message_content:
+                    solution = message_content.split("```python")[1].split("```")[0].strip()
+
+            else:
+                solution = "Soluzione non disponibile"
+
+            filtered_results.append({
+                "exercise": exercise,
+                "prompt": prompt,
+                "solution": solution
+            })
+
+        # Salvataggio nel file JSON
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            json.dump(filtered_results, f, indent=4)
+            json.dump(filtered_results, f, indent=4, ensure_ascii=False)
 
-        print(f"Risultati filtrati salvati in {OUTPUT_FILE}")
+        print(f"Risultati salvati in {OUTPUT_FILE}")
 
     except Exception as e:
         print(f"Errore nel salvataggio del file JSON: {e}")

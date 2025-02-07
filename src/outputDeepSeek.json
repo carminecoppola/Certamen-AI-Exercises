@@ -1,0 +1,7 @@
+[
+    {
+        "exercise": "Esercizio 1",
+        "prompt": "Esercizio: Hello World\nDescrizione: Write a function that returns the string 'Hello, World!'.\nProvide the solution as code, with a function that implements the required logic.",
+        "solution": "def hello_world():\n    return 'Hello, World!'\n\n# Esempio di utilizzo:\nprint(hello_world())"
+    }
+]
