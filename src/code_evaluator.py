@@ -1,31 +1,77 @@
+from pythonmonkey import eval as js_eval
 import json
 
-def execute_python_code(code, test_inputs, expected_outputs):
-    results = []
-    local_scope = {}
 
-    try:
-        exec(code, {}, local_scope)
+class CodeExecutor:
+    """Base class for executing code in different programming languages."""
+    
+    def __init__(self, code, test_inputs, expected_outputs):
+        self.code = code
+        self.test_inputs = test_inputs
+        self.expected_outputs = expected_outputs
+        self.results = []
 
-        function_name = list(local_scope.keys())[0]
-        function = local_scope[function_name]
+    def execute(self):
+        """To be implemented by subclasses."""
+        raise NotImplementedError("Subclasses must implement execute method.")
 
-        for test_input, expected_output in zip(test_inputs, expected_outputs):
+    def execute_function(self, func):
+        """Executes the function and compares output with expected values."""
+        for test_input, expected_output in zip(self.test_inputs, self.expected_outputs):
             try:
-                output = function(test_input)
-                results.append({
+                output = func(test_input)
+                self.results.append({
                     "input": test_input,
                     "expected": expected_output,
                     "output": output,
                     "success": output == expected_output
                 })
             except Exception as e:
-                results.append({
+                self.results.append({
                     "input": test_input,
                     "error": str(e),
                     "success": False
                 })
-    except Exception as e:
-        return [{"error": f"Code execution failed: {str(e)}", "success": False}]
 
-    return results
+        return self.results
+
+
+class PythonExecutor(CodeExecutor):
+    """Executes Python code dynamically using exec()."""
+
+    def execute(self):
+        local_scope = {}
+        try:
+            exec(self.code, {}, local_scope)
+            function_name = next(iter(local_scope))
+            return self.execute_function(local_scope[function_name])
+        except Exception as e:
+            return [{"error": f"Python execution failed: {str(e)}", "success": False}]
+
+
+class JavaScriptExecutor(CodeExecutor):
+    """Executes JavaScript code using PythonMonkey."""
+
+    def execute(self):
+        try:
+            js_eval(self.code)
+            function_name = self.code.split("function ")[1].split("(")[0].strip()
+            return self.execute_function(lambda x: js_eval(f"{function_name}({json.dumps(x)})"))
+        except Exception as e:
+            return [{"error": f"JavaScript execution failed: {str(e)}", "success": False}]
+
+
+class CodeExecutionFactory:
+    """Factory to create the appropriate executor based on language."""
+    
+    EXECUTOR_CLASSES = {
+        "python": PythonExecutor,
+        "javascript": JavaScriptExecutor
+    }
+
+    @staticmethod
+    def get_executor(language, code, test_inputs, expected_outputs):
+        executor_class = CodeExecutionFactory.EXECUTOR_CLASSES.get(language.lower())
+        if not executor_class:
+            return [{"error": f"Unsupported language: {language}", "success": False}]
+        return executor_class(code, test_inputs, expected_outputs).execute()

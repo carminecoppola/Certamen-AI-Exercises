@@ -4,6 +4,7 @@ import openai
 import re
 from config import Config
 
+
 class LLMGenerator:
     def __init__(self, api_url, api_key, model):
         self.api_key = api_key
