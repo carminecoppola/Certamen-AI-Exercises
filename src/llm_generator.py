@@ -2,7 +2,7 @@ import json
 import json5
 import openai
 import re
-from config import Config
+from src.config import Config
 
 
 class LLMGenerator:

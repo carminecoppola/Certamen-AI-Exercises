@@ -1,7 +1,7 @@
-from config import Config
-from llm_generator import LLMGenerator
-from llm_executor import LLMExecutor
-from code_evaluator import CodeExecutionFactory
+from src.config import Config
+from src.llm_generator import LLMGenerator
+from src.llm_executor import LLMExecutor
+from src.code_evaluator import CodeExecutionFactory
 
 import argparse
 import json
