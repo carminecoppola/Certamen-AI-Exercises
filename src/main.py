@@ -3,11 +3,20 @@ from llm_generator import LLMGenerator
 from llm_executor import LLMExecutor
 from code_evaluator import CodeExecutionFactory
 
+import argparse
 import json
 import re
 
 
 class Main:
+    @staticmethod
+    def parse_arguments():
+        """Parses command-line arguments."""
+        parser = argparse.ArgumentParser(description="Run LLM exercise generator and evaluator.")
+        parser.add_argument("--language", type=str, choices=["python", "javascript"], default="python",
+                            help="Programming language for exercises (default: python)")
+        return parser.parse_args()
+
     @staticmethod
     def clean_and_parse_json(content_str):
         cleaned_str = re.sub(r"^```json\n|\n```$", "", content_str.strip())
@@ -18,12 +27,15 @@ class Main:
 
     @staticmethod
     def run():
+        args = Main.parse_arguments()
+        language = args.language
+
         print("Starting program")
 
         # Initialize LLM Generator
         generator = LLMGenerator(Config.GENERATOR_API_URL, Config.GENERATOR_API_KEY, Config.GENERATOR_MODEL)
         # Initialize LLM Executor
-        executor = LLMExecutor(Config.EXECUTOR_API_URL, Config.EXECUTOR_API_KEY, Config.EXECUTOR_MODEL, language="javascript")
+        executor = LLMExecutor(Config.EXECUTOR_API_URL, Config.EXECUTOR_API_KEY, Config.EXECUTOR_MODEL, language=language)
         
         # Step 1: Generate exercises with LLM
         exercises = generator.generate_exercises()
