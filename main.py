@@ -66,7 +66,7 @@ class Main:
                 print("Error: No valid solution received from LLM.")
                 continue
 
-            # TODO: remove it (just for testing we create the solution only for the first exercise)
+            # TODO: remove it (just for testing)
             break
 
 
