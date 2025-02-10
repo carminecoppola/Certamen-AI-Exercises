@@ -1,18 +1,27 @@
 import json
 import json5
 import openai
+import os
 import re
 from src.config import Config
 
 
 class LLMGenerator:
-    def __init__(self, api_url, api_key, model):
+    def __init__(self, api_url, api_key, model, filename="generated_exercises.json"):
         self.api_key = api_key
         self.model = model
         self.client = openai.OpenAI(base_url=api_url, api_key=api_key)
+        self.filename = filename
 
-    def generate_exercises(self):
-        """Generates a list of programming exercises using OpenAI and returns them."""
+    def generate_exercises(self, force_regenerate=False):
+        """Generates a list of programming exercises using OpenAI and saves them in a JSON file."""
+
+        # Se il file esiste e non vogliamo rigenerare, leggiamo i dati esistenti
+        if not force_regenerate and os.path.exists(self.filename):
+            print(f"Loading exercises from {self.filename}")
+            return self.load_exercises_from_json()
+
+        # Prompt for generating the exercises
         prompt = """
         Generate a list of 10 programming exercises in JSON format. Each exercise must strictly follow this structure:
 
@@ -46,11 +55,41 @@ class LLMGenerator:
                 model=self.model,
                 messages=[{"role": "system", "content": prompt}]
             )
+
+            # Valid response control
+            if not response or not hasattr(response, "choices") or not response.choices:
+                print("Error: LLM response is empty or invalid.")
+                return []
+
             raw_response = response.choices[0].message.content.strip()
             exercises = self.clean_and_validate_json(raw_response)
+
+            if exercises:
+                self.save_exercises_to_json(exercises)  # Salviamo gli esercizi in JSON
+                print(f"Exercises saved in {self.filename}")
+
             return exercises if exercises else []
+
         except openai.OpenAIError as e:
             print(f"OpenAI API error: {e}")
+            return []
+
+    def save_exercises_to_json(self, exercises):
+        """Save the exercises in a JSON file."""
+        try:
+            with open(self.filename, "w", encoding="utf-8") as f:
+                json.dump(exercises, f, indent=4, ensure_ascii=False)
+            print(f"Exercises successfully saved in {self.filename}")
+        except IOError as e:
+            print(f"Error saving exercises to file: {e}")
+
+    def load_exercises_from_json(self):
+        """Load the exercises from the existing JSON file."""
+        try:
+            with open(self.filename, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            print(f"Error loading exercises from file: {e}")
             return []
 
     @staticmethod

@@ -1,10 +1,8 @@
 from pythonmonkey import eval as js_eval
 import json
 
-
 class CodeExecutor:
     """Base class for executing code in different programming languages."""
-    
     def __init__(self, code, test_inputs, expected_outputs):
         self.code = code
         self.test_inputs = test_inputs
@@ -38,7 +36,6 @@ class CodeExecutor:
 
 class PythonExecutor(CodeExecutor):
     """Executes Python code dynamically using exec()."""
-
     def execute(self):
         local_scope = {}
         try:
@@ -51,7 +48,6 @@ class PythonExecutor(CodeExecutor):
 
 class JavaScriptExecutor(CodeExecutor):
     """Executes JavaScript code using PythonMonkey."""
-
     def execute(self):
         try:
             js_eval(self.code)
@@ -63,7 +59,6 @@ class JavaScriptExecutor(CodeExecutor):
 
 class CodeExecutionFactory:
     """Factory to create the appropriate executor based on language."""
-    
     EXECUTOR_CLASSES = {
         "python": PythonExecutor,
         "javascript": JavaScriptExecutor
