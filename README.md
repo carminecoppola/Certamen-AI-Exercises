@@ -44,11 +44,11 @@ The `.env` file must contain the required API keys. Create it in the project's r
 
 ```
 GENERATOR_API_KEY=<your-api-key>
-GENERATOR_API_URL=https://api.openai.com/v1/chat/completions
+GENERATOR_API_URL=https://api.openai.com/v1/
 GENERATOR_MODEL=gpt-4
 
 EXECUTOR_API_KEY=<your-api-key>
-EXECUTOR_API_URL=https://openrouter.ai/api/v1/chat/completions
+EXECUTOR_API_URL=https://openrouter.ai/api/v1/
 EXECUTOR_MODEL=deepseek/deepseek-r1:free
 ```
 

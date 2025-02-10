@@ -37,11 +37,11 @@ class CodeExecutor:
 class PythonExecutor(CodeExecutor):
     """Executes Python code dynamically using exec()."""
     def execute(self):
-        local_scope = {}
+        global_scope = {}
         try:
-            exec(self.code, {}, local_scope)
-            function_name = next(iter(local_scope))
-            return self.execute_function(local_scope[function_name])
+            exec(self.code, global_scope)
+            function_name = [name for name in global_scope if callable(global_scope[name])][0]
+            return self.execute_function(global_scope[function_name])
         except Exception as e:
             return [{"error": f"Python execution failed: {str(e)}", "success": False}]
 
