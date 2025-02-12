@@ -16,7 +16,7 @@ class LLMGenerator:
     def generate_exercises(self, force_regenerate=False):
         """Generates a list of programming exercises using OpenAI and saves them in a JSON file."""
 
-        # Se il file esiste e non vogliamo rigenerare, leggiamo i dati esistenti
+        # If the file exists, and we don't want to regenerate, we read the existing data.
         if not force_regenerate and os.path.exists(self.filename):
             print(f"Loading exercises from {self.filename}")
             return self.load_exercises_from_json()
@@ -65,7 +65,7 @@ class LLMGenerator:
             exercises = self.clean_and_validate_json(raw_response)
 
             if exercises:
-                self.save_exercises_to_json(exercises)  # Salviamo gli esercizi in JSON
+                self.save_exercises_to_json(exercises)  # We save exercises in JSON
                 print(f"Exercises saved in {self.filename}")
 
             return exercises if exercises else []

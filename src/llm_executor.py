@@ -10,26 +10,27 @@ class LLMExecutor:
         self.model = model
         self.client = openai.OpenAI(base_url=api_url, api_key=api_key)
         self.language = language
-        self.debug = debug  # Controlla se stampare log dettagliati
+        self.debug = debug  # Check whether to print detailed logs.
 
     def create_prompt(self, data) -> str:
         """Generating a prompt for the LLM with the given data."""
         if data and "name" in data and "description" in data:
             return f"""
-            Return a {self.language} function that takes a single argument and produces an output based on the given description.
+            Return a {self.language} code that MUST take as input some parameters and MUST produces an output based on the given description. The function MUST return only the result, without any string. If the language is Java, add also the main and read the parameters from args.
+
 
             Exercise: {data['name']}
             Description: {data['description']}
 
+
             The response must be in a valid JSON format:
             {{
                 "exercise": "{data['name']}",
-                "solution": {json.dumps(self.generate_function_template())},
-                "input": {json.dumps(data.get('input', []))},
-                "output": {json.dumps(data.get('output', []))}
+                "solution": {json.dumps(self.generate_function_template())}
             }}
             """
         return ""
+
 
     def query_model(self, prompt, save_response=True):
         """Send the request to the LLM and return the response."""
@@ -42,18 +43,18 @@ class LLMExecutor:
                 messages=[{"role": "user", "content": prompt}]
             )
 
-            # Valid response control
+            # Verify that the answer is valid
             if not response or not hasattr(response, "choices") or not response.choices:
                 print("Error: LLM response is empty or invalid.")
                 return None
 
             response_content = response.choices[0].message.content.strip()
 
-            # Log of the response only if the value of debug is TRUE
+            # Response log only if debug is active
             if self.debug:
                 print(f"[DEBUG] LLM Response: {response_content}")
 
-            # Saving the response only if it's required
+            # Save response only if required
             if save_response:
                 self.save_response_to_json(prompt, response_content)
 
@@ -66,6 +67,7 @@ class LLMExecutor:
     def save_response_to_json(self, prompt, response_content):
         """Save the response of the LLM in a JSON file for each language."""
         filename = f"executor_responses_{self.language}.json"
+        print(f"")
         response_data = {
             "prompt": prompt.strip(),
             "response": response_content
@@ -77,7 +79,7 @@ class LLMExecutor:
                 try:
                     existing_data = json.load(f)
                 except json.JSONDecodeError:
-                    existing_data = []  # Se il file è corrotto, iniziamo da zero
+                    existing_data = []  # If the file is corrupt, we start from scratch.
         else:
             existing_data = []
 
