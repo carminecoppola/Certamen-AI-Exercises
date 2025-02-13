@@ -16,7 +16,11 @@ class LLMExecutor:
         """Generating a prompt for the LLM with the given data."""
         if data and "name" in data and "description" in data:
             return f"""
-            Return a {self.language} code that MUST take as input some parameters and MUST produces an output based on the given description. The function MUST return only the result, without any string. If the language is Java, add also the main and read the parameters from args.
+            Return a {self.language} code that MUST take as input some parameters and MUST produces an output based on the given description. 
+            The function MUST return only the result, without any string. 
+            If the exercise has more than one argument, ensure that all parameters are correctly handled and passed to the function.
+            The function should accept multiple inputs separately and process them accordingly.
+            If the language is Java, add also the main and read the parameters from args.
 
 
             Exercise: {data['name']}
