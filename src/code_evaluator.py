@@ -1,5 +1,10 @@
 from pythonmonkey import eval as js_eval
+import tempfile
 import json
+import subprocess
+import os
+import re
+
 
 class CodeExecutor:
     """Base class for executing code in different programming languages."""
@@ -15,9 +20,18 @@ class CodeExecutor:
 
     def execute_function(self, func):
         """Executes the function and compares output with expected values."""
+
         for test_input, expected_output in zip(self.test_inputs, self.expected_outputs):
             try:
                 output = func(test_input)
+
+                if self.language == "Java":
+                    expected_output_tmp = str(expected_output)
+                    if isinstance(expected_output, bool):
+                        expected_output_tmp = str(expected_output).lower()
+
+                    expected_output = expected_output_tmp
+
                 self.results.append({
                     "input": test_input,
                     "expected": expected_output,
@@ -36,6 +50,10 @@ class CodeExecutor:
 
 class PythonExecutor(CodeExecutor):
     """Executes Python code dynamically using exec()."""
+    def __init__(self, code, test_inputs, expected_outputs):
+        super().__init__(code, test_inputs, expected_outputs)
+        self.language = "Python"
+
     def execute(self):
         global_scope = {}
         try:
@@ -48,6 +66,10 @@ class PythonExecutor(CodeExecutor):
 
 class JavaScriptExecutor(CodeExecutor):
     """Executes JavaScript code using PythonMonkey."""
+    def __init__(self, code, test_inputs, expected_outputs):
+        super().__init__(code, test_inputs, expected_outputs)
+        self.language = "JavaScript"
+
     def execute(self):
         try:
             js_eval(self.code)
@@ -57,11 +79,47 @@ class JavaScriptExecutor(CodeExecutor):
             return [{"error": f"JavaScript execution failed: {str(e)}", "success": False}]
 
 
+class JavaExecutor(CodeExecutor):
+    """Executes Java code by compiling and running it as a subprocess."""
+    def __init__(self, code, test_inputs, expected_outputs):
+        super().__init__(code, test_inputs, expected_outputs)
+        self.language = "Java"
+
+    def execute(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            java_file_path = os.path.join(temp_dir, "Solution.java")
+            class_file_path = os.path.join(temp_dir, "Solution.class")
+
+            with open(java_file_path, "w") as f:
+                f.write(self.code)
+
+            try:
+                subprocess.run(["javac", java_file_path], check=True, cwd=temp_dir)
+
+                class_name_match = re.search(r"public\s+class\s+(\w+)", self.code)
+                class_name = class_name_match.group(1) if class_name_match else "Solution"
+
+                def run_java_program(input_value):
+                    if isinstance(input_value, list):
+                        cmd = ["java", "-cp", temp_dir, class_name] + [str(e) for e in input_value]
+                    else:
+                        cmd = ["java", "-cp", temp_dir, class_name, str(input_value)]
+                    
+                    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                    return result.stdout.strip()
+
+                return self.execute_function(run_java_program)
+
+            except subprocess.CalledProcessError as e:
+                return [{"error": f"Java execution failed: {str(e)}", "success": False}]
+
+
 class CodeExecutionFactory:
     """Factory to create the appropriate executor based on language."""
     EXECUTOR_CLASSES = {
         "python": PythonExecutor,
-        "javascript": JavaScriptExecutor
+        "javascript": JavaScriptExecutor,
+        "java": JavaExecutor
     }
 
     @staticmethod

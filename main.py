@@ -14,7 +14,7 @@ class Main:
     def parse_arguments():
         """Parses command-line arguments."""
         parser = argparse.ArgumentParser(description="Run LLM exercise generator and evaluator.")
-        parser.add_argument("--language", type=str, choices=["python", "javascript"], default="python",
+        parser.add_argument("--language", type=str, choices=["python", "javascript", "java"], default="python",
                             help="Programming language for exercises (default: python)")
         return parser.parse_args()
 

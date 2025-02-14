@@ -106,6 +106,7 @@ class LLMExecutor:
         templates = {
             "python": """def solution(input_value):\n\n\t# Implement the function logic here\n\n\treturn result""",
             "javascript": """function solution(inputValue) {\n\n\t// Implement the function logic here\n\n\treturn result;\n}""",
+            "java": """public class Solution {\n\t public static void main(String[] args) {\n\t\t// Implement the function logic here\n\t}\n}""",
             "c": """#include <stdio.h>\n\nint solution(int input) {\n    // Implement the function logic here\n    return 0;\n}\n\nint main() {\n    int input;\n    scanf("%d", &input);\n    printf("%d\\n", solution(input));\n    return 0;\n}""",
             "cpp": """#include <iostream>\nusing namespace std;\n\nint solution(int input) {\n    // Implement the function logic here\n    return 0;\n}\n\nint main() {\n    int input;\n    cin >> input;\n    cout << solution(input) << endl;\n    return 0;\n}"""
         }
