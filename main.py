@@ -18,15 +18,28 @@ class Main:
                             help="Programming language for exercises (default: python)")
         return parser.parse_args()
 
+
     @staticmethod
     def clean_and_parse_json(content_str, language) :
-        cleaned_str = re.sub(r"^```json\n|\n```$", "", content_str.strip())
+        # Extract only the JSON block from the response
+        match = re.search(r"```json\n(.*?)\n```", content_str, re.DOTALL)
+
+        if match :
+            cleaned_str = match.group(1).strip()
+        else :
+            print("\nProblem of response, attempting to extract solution.")
+            # Extract code in the specified language if JSON is not found.
+            match = re.search(rf"```{language}\n(.*?)\n```", content_str, re.DOTALL)
+            if match :
+                return {"solution" : match.group(1).strip()}
+            return None  # No JSON or valid code found
 
         try :
             return json.loads(cleaned_str)
         except json.JSONDecodeError :
-            match = re.search(rf'```{language}\n(.*?)\n```', content_str, re.DOTALL)
-            print("\nProblem of response, parse the json file")
+            print("\nInvalid JSON format, attempting to extract just the solution.")
+            # Try to retrieve the solution as code in the specified language.
+            match = re.search(rf"```{language}\n(.*?)\n```", content_str, re.DOTALL)
             if match :
                 return {"solution" : match.group(1).strip()}
             return None
