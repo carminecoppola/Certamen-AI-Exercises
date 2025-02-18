@@ -1,4 +1,6 @@
 # AIED
+AIED uses LLMs to automatically generate and evaluate programming exercises, creating a closed-loop iterative learning system.
+The goal is to enhance automated learning frameworks and refine AI-based educational tools.
 
 ## Requirements
 
