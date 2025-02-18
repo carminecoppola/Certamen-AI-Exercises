@@ -23,7 +23,10 @@ class CodeExecutor:
 
         for test_input, expected_output in zip(self.test_inputs, self.expected_outputs):
             try:
-                output = func(test_input)
+                if isinstance(test_input, (list, tuple)):
+                    output = func(*test_input)
+                else:
+                    output = func(test_input)
 
                 if self.language == "Java":
                     expected_output_tmp = str(expected_output)
@@ -74,7 +77,7 @@ class JavaScriptExecutor(CodeExecutor):
         try:
             js_eval(self.code)
             function_name = self.code.split("function ")[1].split("(")[0].strip()
-            return self.execute_function(lambda x: js_eval(f"{function_name}({json.dumps(x)})"))
+            return self.execute_function(lambda *args: js_eval(f"{function_name}({','.join(map(json.dumps, args))})"))
         except Exception as e:
             return [{"error": f"JavaScript execution failed: {str(e)}", "success": False}]
 
@@ -99,11 +102,10 @@ class JavaExecutor(CodeExecutor):
                 class_name_match = re.search(r"public\s+class\s+(\w+)", self.code)
                 class_name = class_name_match.group(1) if class_name_match else "Solution"
 
-                def run_java_program(input_value):
-                    if isinstance(input_value, list):
-                        cmd = ["java", "-cp", temp_dir, class_name] + [str(e) for e in input_value]
-                    else:
-                        cmd = ["java", "-cp", temp_dir, class_name, str(input_value)]
+                def run_java_program(*input_values):
+                    cmd = ["java", "-cp", temp_dir, class_name] + [str(e) for e in input_values]
+                    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                    return result.stdout.strip()
                     
                     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
                     return result.stdout.strip()
