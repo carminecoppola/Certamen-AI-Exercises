@@ -1,5 +1,5 @@
-# AIED
-AIED uses LLMs to automatically generate and evaluate programming exercises, creating a closed-loop iterative learning system.
+# Certamen-AI-Exercises
+Certamen-AI-Exercises uses LLMs to automatically generate and evaluate programming exercises, creating a closed-loop iterative learning system.
 The goal is to enhance automated learning frameworks and refine AI-based educational tools.
 
 ## Requirements
@@ -19,8 +19,8 @@ Before starting, make sure you have installed:
 Open a terminal and clone the project:
 
 ```sh
-git clone https://github.com/carminecoppola/AIED.git
-cd AIED
+[git clone https://github.com/carminecoppola/AIED.git
+](https://github.com/carminecoppola/Certamen-AI-Exercises.git)cd AIED
 ```
 
 ### 2. **Create and activate a virtual environment**
