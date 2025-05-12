@@ -20,7 +20,7 @@ Open a terminal and clone the project:
 
 ```sh
 https://github.com/carminecoppola/Certamen-AI-Exercises.git
-cd AIED
+cd Certamen-AI-Exercises
 ```
 
 ### 2. **Create and activate a virtual environment**
