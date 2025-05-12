@@ -19,7 +19,7 @@ Before starting, make sure you have installed:
 Open a terminal and clone the project:
 
 ```sh
-git clone https://github.com/carminecoppola/AIED.git
+https://github.com/carminecoppola/Certamen-AI-Exercises.git
 cd AIED
 ```
 
