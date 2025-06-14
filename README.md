@@ -68,7 +68,9 @@ python main.py
 ---
 
 ## Demo
-
+In the demo, the system generates a programming exercise using one LLM, while a second LLM is responsible for solving the task, compiling the solution, and executing it.
+The result is then compared against the expected output provided by the generator. If the outputs match, the exercise is marked as correct.
+This process enables an automated, self-contained validation loop for programming exercises.
 
 https://github.com/user-attachments/assets/2fa5abe2-f241-4891-af86-fa88a8a490bb
 
