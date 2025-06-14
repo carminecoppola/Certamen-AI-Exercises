@@ -12,27 +12,63 @@ class LLMExecutor:
         self.language = language
         self.debug = debug  # Check whether to print detailed logs.
 
+    # def create_prompt(self, data) -> str:
+    #     """Generating a prompt for the LLM with the given data."""
+    #     if data and "name" in data and "description" in data:
+    #         return f"""
+    #         Return a {self.language} code that MUST take as input some parameters and MUST produces an output based on the given description. 
+    #         The function MUST return only the result, without any string. 
+    #         If the exercise has more than one argument, ensure that all parameters are correctly handled and passed to the function.
+    #         The function should accept multiple inputs separately and process them accordingly.
+    #         If the language is Java, add also the main and read the parameters from args.
+
+
+    #         Exercise: {data['name']}
+    #         Description: {data['description']}
+
+
+    #         The response must be in a valid JSON format:
+    #         {{
+    #             "exercise": "{data['name']}",
+    #             "solution": {json.dumps(self.generate_function_template())}
+    #         }}
+    #         """
+    #     return ""
+    
     def create_prompt(self, data) -> str:
-        """Generating a prompt for the LLM with the given data."""
+        """
+        Generates a prompt that strictly forces the LLM to output ONLY a valid JSON object 
+        without any extra text, comments, or markdown.
+        """
         if data and "name" in data and "description" in data:
             return f"""
-            Return a {self.language} code that MUST take as input some parameters and MUST produces an output based on the given description. 
-            The function MUST return only the result, without any string. 
-            If the exercise has more than one argument, ensure that all parameters are correctly handled and passed to the function.
-            The function should accept multiple inputs separately and process them accordingly.
-            If the language is Java, add also the main and read the parameters from args.
+        You are an automatic code generator.
 
+        Task:
+        Given the exercise below, return ONLY a valid JSON object in your response. 
+        Do NOT add any comments, markdown, explanations, or extra text.
 
-            Exercise: {data['name']}
-            Description: {data['description']}
+        Format (STRICT):
+        {{
+            "exercise": "{data['name']}",
+            "solution": "<COMPLETE CODE AS A SINGLE STRING>"
+        }}
 
+        - The solution must be valid {self.language} code for a function named 'solution', as shown in the template below.
+        - The function must take as input all required parameters, process them as described, and return ONLY the result (no print, no extra output).
+        - If the exercise has more than one argument, ensure the function signature is correct.
+        - If the language is Java, include a full class with a static main that reads from args.
+        - DO NOT include any explanation, comments, markdown, triple backticks, or any text outside the JSON.
 
-            The response must be in a valid JSON format:
-            {{
-                "exercise": "{data['name']}",
-                "solution": {json.dumps(self.generate_function_template())}
-            }}
-            """
+        Exercise: {data['name']}
+        Description: {data['description']}
+
+        Template:
+        {{
+            "exercise": "{data['name']}",
+            "solution": {json.dumps(self.generate_function_template())}
+        }}
+        """
         return ""
 
 
@@ -70,7 +106,7 @@ class LLMExecutor:
 
     def save_response_to_json(self, prompt, response_content):
         """Save the response of the LLM in a JSON file for each language."""
-        filename = f"executor_responses_{self.language}.json"
+        filename = os.path.join("results", f"executor_responses_{self.language}.json")
         print(f"")
         response_data = {
             "prompt": prompt.strip(),

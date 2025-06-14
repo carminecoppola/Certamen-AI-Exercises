@@ -7,7 +7,7 @@ from src.config import Config
 
 
 class LLMGenerator:
-    def __init__(self, api_url, api_key, model, filename="generated_exercises.json"):
+    def __init__(self, api_url, api_key, model, filename="results/generated_exercises.json"):
         self.api_key = api_key
         self.model = model
         self.client = openai.OpenAI(base_url=api_url, api_key=api_key)
